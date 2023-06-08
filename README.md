@@ -1,3 +1,61 @@
+//LMN
+
+// Classe wrapper pour AVAudioPlayer
+class AudioPlayer: Equatable {
+    let player: AVAudioPlayer
+
+    init(player: AVAudioPlayer) {
+        self.player = player
+    }
+
+    static func == (lhs: AudioPlayer, rhs: AudioPlayer) -> Bool {
+        return lhs.player == rhs.player
+    }
+}
+
+struct ContentView: View {
+    // Les noms des fichiers son et leurs alias pour l'affichage
+    let sounds = [
+        "sound1": "Son 1",
+        "sound2": "Son 2",
+        "sound3": "Son 3"
+    ]
+
+    // Le son sélectionné par l'utilisateur
+    @State private var selectedSound = "sound1"
+
+    // Les lecteurs audio pour chaque son
+    @State private var soundPlayers: [String: AudioPlayer]
+
+    var body: some View {
+        VStack {
+            // Le sélecteur de son
+            List(sounds.keys.sorted(), id: \.self) { sound in
+                HStack {
+                    Text(self.sounds[sound] ?? sound)
+                    Spacer()
+                    if sound == selectedSound {
+                        Image(systemName: "checkmark")
+                    }
+                }
+                .contentShape(Rectangle())  // Make the entire row clickable
+                .onTapGesture {
+                    self.selectedSound = sound
+                }
+            }
+
+            // An example view that responds to shaking
+            Text("Secouez-moi!")
+                .onShake {
+                    self.soundPlayers[self.selectedSound]?.player.play()
+                }
+        }
+    }
+}
+
+
+
+
 // ABS
 
 
