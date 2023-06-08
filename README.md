@@ -1,3 +1,48 @@
+// ABS
+
+
+struct ContentView: View {
+    // The sound file names and their aliases for display
+    let sounds = [
+        "sound1": "Sound 1",
+        "sound2": "Sound 2",
+        "sound3": "Sound 3"
+    ]
+
+    // The sound selected by the user
+    @State private var selectedSound = "sound1"
+
+    // The audio players for each sound
+    var soundPlayers: [String: AVAudioPlayer]
+
+    var body: some View {
+        VStack {
+            // The sound selector
+            List(sounds.keys.sorted(), id: \.self) { sound in
+                HStack {
+                    Text(self.sounds[sound] ?? sound)
+                    Spacer()
+                    if sound == selectedSound {
+                        Image(systemName: "checkmark")
+                    }
+                }
+                .contentShape(Rectangle())  // Make the entire row clickable
+                .onTapGesture {
+                    self.selectedSound = sound
+                }
+            }
+
+            // An example view that responds to shaking
+            Text("Shake me!")
+                .onShake {
+                    self.soundPlayers[self.selectedSound]?.play()
+                }
+        }
+    }
+}
+
+
+
 // XYZ
 
 struct ContentView: View {
