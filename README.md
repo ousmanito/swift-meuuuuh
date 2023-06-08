@@ -1,3 +1,41 @@
+// XYZ
+
+struct ContentView: View {
+    // Les noms des fichiers son et leurs alias pour l'affichage
+    let sounds = [
+        "sound1": "Son 1",
+        "sound2": "Son 2",
+        "sound3": "Son 3"
+    ]
+
+    // Le son sélectionné par l'utilisateur
+    @State private var selectedSound = "sound1"
+
+    // Les lecteurs audio pour chaque son
+    var soundPlayers: [String: AVAudioPlayer]
+
+    var body: some View {
+        VStack {
+            // Le sélecteur de son
+            Picker("Choisissez un son", selection: $selectedSound) {
+                ForEach(sounds.keys.sorted(), id: \.self) { sound in
+                    Text(self.sounds[sound] ?? sound).tag(sound)
+                }
+            }.pickerStyle(RadioGroupPickerStyle())
+
+            // Un exemple de vue qui réagit au secouement
+            Text("Secouez-moi!")
+                .onShake {
+                    self.soundPlayers[self.selectedSound]?.play()
+                }
+        }
+    }
+}
+
+
+
+
+
 // Etape 1 : Faire en sorte d'avoir une liste de sons avec laquelle l'utilisateur peut interagir
 //       => C'est à  dire qu'il appuie et que le son est joué.
 
