@@ -1,3 +1,68 @@
+// JDK
+
+
+struct ContentView: View {
+    let sounds = [
+        "sound1": "Son 1",
+        "sound2": "Son 2",
+        "sound3": "Son 3"
+    ]
+
+    @State private var selectedSound = "sound1"
+    @State private var currentPlayingSound: String?
+
+    @State private var soundPlayers: [String: AudioPlayer]?
+
+    var body: some View {
+        VStack {
+            List(sounds.keys.sorted(), id: \.self) { sound in
+                HStack {
+                    Text(self.sounds[sound] ?? sound)
+                    Spacer()
+                    if sound == selectedSound {
+                        Image(systemName: "checkmark")
+                    }
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    self.selectedSound = sound
+                }
+            }
+
+            Text("Secouez-moi!")
+                .onShake {
+                    // Stop the current playing sound if there is one
+                    if let currentPlayingSound = currentPlayingSound {
+                        self.soundPlayers?[currentPlayingSound]?.player.stop()
+                    }
+
+                    // Play the selected sound
+                    self.soundPlayers?[self.selectedSound]?.player.play()
+
+                    // Update the current playing sound
+                    self.currentPlayingSound = self.selectedSound
+                }
+        }
+        .onAppear(perform: loadSounds)
+    }
+
+    private func loadSounds() {
+        var players: [String: AudioPlayer] = [:]
+
+        for sound in sounds.keys {
+            let path = Bundle.main.path(forResource: sound, ofType: "mp3")!
+            let url = URL(fileURLWithPath: path)
+            let player = try! AVAudioPlayer(contentsOf: url)
+
+            players[sound] = AudioPlayer(player: player)
+        }
+
+        soundPlayers = players
+    }
+}
+
+
+
 //MLS
 
 
