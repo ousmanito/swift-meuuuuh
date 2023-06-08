@@ -1,21 +1,15 @@
-//
-//  ContentView.swift
-//  swift-meuuuh
-//
-//  Created by Utilisateur invité on 08/06/2023.
-//
-
 import SwiftUI
 import AVFoundation
 
+
 extension UIDevice {
-    static let devideDidShakeNotif = Notification.Name(rawValue: "deviceDidShakeNotif")
+    static let phoneDidShakeNotif = Notification.Name(rawValue: "phoneDidShakeNotif")
 }
 
 extension UIWindow {
     open override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
         if motion == .motionShake {
-            NotificationCenter.default.post(name: UIDevice.devideDidShakeNotif, object: nil)
+            NotificationCenter.default.post(name: UIDevice.phoneDidShakeNotif, object: nil)
         }
     }
 }
@@ -26,7 +20,7 @@ struct DeviceShakeViewModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .onAppear()
-            .onReceive(NotificationCenter.default.publisher(for: UIDevice.devideDidShakeNotif)) {
+            .onReceive(NotificationCenter.default.publisher(for: UIDevice.phoneDidShakeNotif)) {
                 _ in action()
             }
     }
@@ -51,11 +45,9 @@ class AudioPlayer: Equatable {
     }
 }
 
-//
-
 
 struct ContentView: View {
-    let sonsArray = [
+    let sons = [
         "AMBBird_Reveil des oiseaux 3 (ID 0999)_LS": "Réveil des oiseaux",
         "ANMLCat_Miaulement chat 2 (ID 1890)_LS": "Miaulement chat",
         "ANMLDog_Chien qui aboie 3 (ID 2955)_LS": "Chien qui aboie",
@@ -73,14 +65,28 @@ struct ContentView: View {
 
     @State private var selectedSound = "BIRDPrey_Hibou moyen duc (ID 0936)_LS"
     @State private var currentPlayingSound: String?
-
     @State private var soundPlayers: [String: AudioPlayer]?
 
     var body: some View {
+        
+        Text("Selectionnez un son et secouez le téléphone pour génerer un son !")
+            .font(.custom("Helvetica Neue", size: 22))
+            .foregroundColor(Color.blue)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 20)
+            .bold()
+            .onShake {
+                if let currentPlayingSound = currentPlayingSound {
+                    self.soundPlayers?[currentPlayingSound]?.player.stop()
+                }
+                self.soundPlayers?[self.selectedSound]?.player.play()
+                self.currentPlayingSound = self.selectedSound
+            }
+        
         VStack {
-            List(sonsArray.keys.sorted(), id: \.self) { sound in
+            List(sons.keys.sorted(), id: \.self) { sound in
                 HStack {
-                    Text(self.sonsArray[sound] ?? sound)
+                    Text(self.sons[sound] ?? sound)
                     Spacer()
                     if sound == selectedSound {
                         Image(systemName: "checkmark")
@@ -91,35 +97,19 @@ struct ContentView: View {
                     self.selectedSound = sound
                 }
             }
-
-            Text("Secouez-moi!")
-                .onShake {
-                    // Stop the current playing sound if there is one
-                    if let currentPlayingSound = currentPlayingSound {
-                        self.soundPlayers?[currentPlayingSound]?.player.stop()
-                    }
-
-                    // Play the selected sound
-                    self.soundPlayers?[self.selectedSound]?.player.play()
-
-                    // Update the current playing sound
-                    self.currentPlayingSound = self.selectedSound
-                }
         }
         .onAppear(perform: loadSounds)
     }
 
     private func loadSounds() {
         var players: [String: AudioPlayer] = [:]
-
-        for sound in sonsArray.keys {
-            let path = Bundle.main.path(forResource: "media/" + sound, ofType: "wav")!
+        for son in sons.keys {
+            let path = Bundle.main.path(forResource: "media/" + son, ofType: "wav")!
             let url = URL(fileURLWithPath: path)
             let player = try! AVAudioPlayer(contentsOf: url)
 
-            players[sound] = AudioPlayer(player: player)
+            players[son] = AudioPlayer(player: player)
         }
-
         soundPlayers = players
     }
 }
